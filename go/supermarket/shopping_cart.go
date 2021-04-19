@@ -44,7 +44,7 @@ func (c *ShoppingCart) handleOffers(receipt *Receipt, offers map[Product]Special
 				x = 3
 
 			} else if offer.offerType == TwoForAmount {
-				discount = getNForAmountDiscount(p, quantity, unitPrice, offer.offerType, offer.argument)
+				discount = getNForAmountDiscount(2, p, quantity, unitPrice, offer.offerType, offer.argument)
 
 			}
 			if offer.offerType == FiveForAmount {
@@ -71,15 +71,19 @@ func (c *ShoppingCart) handleOffers(receipt *Receipt, offers map[Product]Special
 	}
 }
 
-func getNForAmountDiscount(p Product, quantity float64, unitPrice float64, offerType SpecialOfferType, offerArg float64) *Discount {
+func getNForAmountDiscount(N int, p Product, quantity float64, unitPrice float64, offerType SpecialOfferType, offerArg float64) *Discount {
 	x := 1
+	quantityAsInt := int(quantity)
+	if quantityAsInt < N {
+		return nil
+	}
 	if offerType == TwoForAmount {
-		x = 2
-		quantityAsInt := int(quantity)
+		x = N
+
 		offercount := int(quantityAsInt / x)
 		var total = offerArg*float64(offercount) + float64(quantityAsInt-(offercount*2))*unitPrice
 		var discountN = unitPrice*quantity - total
 		return &Discount{product: p, description: fmt.Sprintf("2 for %.2f", offerArg), discountAmount: -discountN}
 	}
-	return &Discount{}
+	return nil
 }
